@@ -233,69 +233,92 @@ const AutocompleteEditor = () => {
   return (
     <div
       style={{
-        padding: '20px',
-        fontFamily: 'Arial, sans-serif',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '8px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        maxWidth: '600px',
         margin: 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        alignContent: 'center',
+        alignItems: 'center',
+        width: '1000px',
       }}
     >
       <div
         style={{
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          padding: '12px',
-          minHeight: '200px',
-          position: 'relative',
-          backgroundColor: '#fff',
-        }}
-        onClick={() => {
-          if (!editorState.getSelection().getHasFocus()) {
-            setEditorState(EditorState.moveFocusToEnd(editorState));
-          }
+          fontWeight: 'bolder',
+          fontSize: '20px',
+          marginBottom: '20px',
         }}
       >
-        <Editor
-          editorState={editorState}
-          onChange={setEditorState}
-          handleBeforeInput={handleBeforeInput}
-          handleKeyCommand={handleKeyCommand}
-          keyBindingFn={keyBindingFn}
-          placeholder="Type '<' followed by a word to see suggestions..."
-        />
-        {filteredSuggestions.length > 0 && (
-          <ul
-            style={{
-              position: 'absolute',
-              zIndex: 10,
-              marginTop: '8px',
-              backgroundColor: '#fff',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              listStyle: 'none',
-              padding: '8px 0',
-              width: '100%',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            {filteredSuggestions.map((suggestion, index) => (
-              <li
-                key={suggestion}
-                style={{
-                  padding: '8px',
-                  cursor: 'pointer',
-                  backgroundColor: index === highlightedIndex ? '#ddd' : '#fff',
-                  color: '#333',
-                }}
-                onMouseDown={() => insertSuggestion(suggestion)}
-              >
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        )}
+        Draft.js Editor
+      </div>
+      <div
+        style={{
+          padding: '20px',
+          fontFamily: 'Arial, sans-serif',
+          backgroundColor: '#f9f9f9',
+          borderRadius: '8px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          maxWidth: '600px',
+          margin: 'auto',
+        }}
+      >
+        <div
+          style={{
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            padding: '12px',
+            minHeight: '200px',
+            position: 'relative',
+            backgroundColor: '#fff',
+            width: '500px',
+          }}
+          onClick={() => {
+            if (!editorState.getSelection().getHasFocus()) {
+              setEditorState(EditorState.moveFocusToEnd(editorState));
+            }
+          }}
+        >
+          <Editor
+            editorState={editorState}
+            onChange={setEditorState}
+            handleBeforeInput={handleBeforeInput}
+            handleKeyCommand={handleKeyCommand}
+            keyBindingFn={keyBindingFn}
+            placeholder="Type '<' followed by a word to see suggestions..."
+          />
+          {filteredSuggestions.length > 0 && (
+            <ul
+              style={{
+                position: 'absolute',
+                zIndex: 10,
+                marginTop: '8px',
+                backgroundColor: '#fff',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                listStyle: 'none',
+                padding: '8px 0',
+                width: '100%',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              {filteredSuggestions.map((suggestion, index) => (
+                <li
+                  key={suggestion}
+                  style={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    backgroundColor:
+                      index === highlightedIndex ? '#ddd' : '#fff',
+                    color: '#333',
+                  }}
+                  onMouseDown={() => insertSuggestion(suggestion)}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
