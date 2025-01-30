@@ -8,7 +8,7 @@ import {
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 
-const suggestions = ['apple', 'and', 'banana', 'cherry', 'date', 'elderberry'];
+const suggestions = ['apple', 'banana', 'cherry', 'date', 'elderberry'];
 
 const AutocompleteEditor = () => {
   const [editorState, setEditorState] = useState(() =>
@@ -25,7 +25,7 @@ const AutocompleteEditor = () => {
             }, callback);
           },
           component: ({ children }) => (
-            <span style={{ color: 'blue', fontWeight: 'bold' }}>
+            <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
               {children}
             </span>
           ),
@@ -47,16 +47,12 @@ const AutocompleteEditor = () => {
     // Combine the current input with the text before the caret
     const textBeforeCaret = blockText.slice(0, caretPosition) + chars;
 
-    console.log('textBeforeCaret:', textBeforeCaret);
-
     // Match the string after "<" until the caret position
-    const match = textBeforeCaret.match(/<([^<]*)$/); // Capture everything after "<"
+    const match = textBeforeCaret.match(/<([^<]*)$/);
 
     if (match) {
-      const newMatchString = match[1]; // Extract the matched part
+      const newMatchString = match[1];
       setMatchString(newMatchString);
-
-      console.log('Matched String:', newMatchString);
 
       // Filter suggestions based on the string after "<"
       setFilteredSuggestions(
@@ -77,19 +73,17 @@ const AutocompleteEditor = () => {
         'insert-characters'
       );
 
-      // Update editor state and ensure the caret is visible
       setEditorState(newEditorState);
       return 'handled';
     }
 
-    // If the input is a backspace or delete and there is no match string, clear suggestions
+    // Handle backspace or empty input
     if (chars === '' || chars === 'backspace') {
       setMatchString('');
       setFilteredSuggestions([]);
       return 'handled';
     }
 
-    // Clear suggestions if no match
     setMatchString('');
     setFilteredSuggestions([]);
     return 'not-handled';
@@ -103,19 +97,12 @@ const AutocompleteEditor = () => {
       const blockText = contentState.getBlockForKey(blockKey).getText();
       const caretPosition = selectionState.getStartOffset();
 
-      // Get the text before the caret (all characters before the caret)
       const textBeforeCaret = blockText.slice(0, caretPosition);
-
-      console.log('backspace textBeforeCaret:', textBeforeCaret);
-
-      // Check if "<" is present and if the user is typing after it
-      const match = textBeforeCaret.match(/<([^<]*)$/); // Match text after "<"
+      const match = textBeforeCaret.match(/<([^<]*)$/);
 
       if (match) {
-        const newMatchString = match[1]; // Extract the matched part after "<"
+        const newMatchString = match[1];
         setMatchString(newMatchString);
-
-        console.log('Matched String after Backspace:', newMatchString);
 
         // Filter suggestions based on the match string
         setFilteredSuggestions(
@@ -125,7 +112,6 @@ const AutocompleteEditor = () => {
         );
       }
 
-      // Handle removing the character(s) when backspace is pressed
       if (caretPosition > 0) {
         const contentStateWithDelete = Modifier.removeRange(
           contentState,
@@ -133,7 +119,7 @@ const AutocompleteEditor = () => {
             focusOffset: caretPosition,
             anchorOffset: caretPosition - 1,
           }),
-          'backward' // Remove the character at the caret position
+          'backward'
         );
 
         const newEditorState = EditorState.push(
@@ -142,10 +128,8 @@ const AutocompleteEditor = () => {
           'backspace-character'
         );
 
-        // Update editor state to reflect the deletion
         setEditorState(newEditorState);
 
-        // After deletion, log the updated match string (i.e., after the change)
         const updatedContentState = newEditorState.getCurrentContent();
         const updatedBlockText = updatedContentState
           .getBlockForKey(blockKey)
@@ -160,17 +144,12 @@ const AutocompleteEditor = () => {
         if (updatedMatch) {
           const updatedMatchString = updatedMatch[1];
           setMatchString(updatedMatchString);
-          console.log(
-            'Updated Match String after Backspace:',
-            updatedMatchString
-          );
           setFilteredSuggestions(
             suggestions.filter((s) =>
               s.toLowerCase().startsWith(updatedMatchString.toLowerCase())
             )
           );
         } else {
-          // If the match string is empty or "<" has been deleted, clear the suggestions
           setFilteredSuggestions([]);
           setMatchString('');
         }
@@ -179,7 +158,6 @@ const AutocompleteEditor = () => {
       }
     }
 
-    // Handle other commands like navigating the suggestions
     if (filteredSuggestions.length) {
       if (command === 'up') {
         setHighlightedIndex((prev) =>
@@ -204,19 +182,15 @@ const AutocompleteEditor = () => {
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection();
 
-    // Find the range of the match string after "<"
     const blockKey = selectionState.getStartKey();
     const blockText = contentState.getBlockForKey(blockKey).getText();
     const caretPosition = selectionState.getStartOffset();
 
-    // Create a regular expression to find the part starting from "<"
     const match = blockText.slice(0, caretPosition).match(/<([^<]*)$/);
 
     if (match) {
-      // Replace the entire match with the suggestion
       const matchLength = match[0].length;
 
-      // Replace the match with the selected suggestion
       const contentStateWithEntity = contentState.createEntity(
         'AUTOCOMPLETE',
         'IMMUTABLE',
@@ -242,7 +216,6 @@ const AutocompleteEditor = () => {
         'insert-characters'
       );
 
-      // Update the editor state and reset match string and suggestions
       setEditorState(newEditorState);
       setMatchString('');
       setFilteredSuggestions([]);
@@ -258,14 +231,25 @@ const AutocompleteEditor = () => {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <div
+      style={{
+        padding: '20px',
+        fontFamily: 'Arial, sans-serif',
+        backgroundColor: '#f9f9f9',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        maxWidth: '600px',
+        margin: 'auto',
+      }}
+    >
       <div
         style={{
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          padding: '8px',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          padding: '12px',
           minHeight: '200px',
           position: 'relative',
+          backgroundColor: '#fff',
         }}
         onClick={() => {
           if (!editorState.getSelection().getHasFocus()) {
@@ -273,16 +257,14 @@ const AutocompleteEditor = () => {
           }
         }}
       >
-        <div style={{ position: 'relative' }}>
-          <Editor
-            editorState={editorState}
-            onChange={setEditorState}
-            handleBeforeInput={handleBeforeInput}
-            handleKeyCommand={handleKeyCommand}
-            keyBindingFn={keyBindingFn}
-            placeholder="Type < followed by a word to see suggestions..."
-          />
-        </div>
+        <Editor
+          editorState={editorState}
+          onChange={setEditorState}
+          handleBeforeInput={handleBeforeInput}
+          handleKeyCommand={handleKeyCommand}
+          keyBindingFn={keyBindingFn}
+          placeholder="Type '<' followed by a word to see suggestions..."
+        />
         {filteredSuggestions.length > 0 && (
           <ul
             style={{
@@ -294,7 +276,8 @@ const AutocompleteEditor = () => {
               borderRadius: '4px',
               listStyle: 'none',
               padding: '8px 0',
-              width: '200px',
+              width: '100%',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
             }}
           >
             {filteredSuggestions.map((suggestion, index) => (
@@ -304,6 +287,7 @@ const AutocompleteEditor = () => {
                   padding: '8px',
                   cursor: 'pointer',
                   backgroundColor: index === highlightedIndex ? '#ddd' : '#fff',
+                  color: '#333',
                 }}
                 onMouseDown={() => insertSuggestion(suggestion)}
               >
