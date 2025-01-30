@@ -96,6 +96,90 @@ const AutocompleteEditor = () => {
   };
 
   const handleKeyCommand = (command: string) => {
+    if (command === 'backspace') {
+      const contentState = editorState.getCurrentContent();
+      const selectionState = editorState.getSelection();
+      const blockKey = selectionState.getStartKey();
+      const blockText = contentState.getBlockForKey(blockKey).getText();
+      const caretPosition = selectionState.getStartOffset();
+
+      // Get the text before the caret (all characters before the caret)
+      const textBeforeCaret = blockText.slice(0, caretPosition);
+
+      console.log('backspace textBeforeCaret:', textBeforeCaret);
+
+      // Check if "<" is present and if the user is typing after it
+      const match = textBeforeCaret.match(/<([^<]*)$/); // Match text after "<"
+
+      if (match) {
+        const newMatchString = match[1]; // Extract the matched part after "<"
+        setMatchString(newMatchString);
+
+        console.log('Matched String after Backspace:', newMatchString);
+
+        // Filter suggestions based on the match string
+        setFilteredSuggestions(
+          suggestions.filter((s) =>
+            s.toLowerCase().startsWith(newMatchString.toLowerCase())
+          )
+        );
+      }
+
+      // Handle removing the character(s) when backspace is pressed
+      if (caretPosition > 0) {
+        const contentStateWithDelete = Modifier.removeRange(
+          contentState,
+          selectionState.merge({
+            focusOffset: caretPosition,
+            anchorOffset: caretPosition - 1,
+          }),
+          'backward' // Remove the character at the caret position
+        );
+
+        const newEditorState = EditorState.push(
+          editorState,
+          contentStateWithDelete,
+          'backspace-character'
+        );
+
+        // Update editor state to reflect the deletion
+        setEditorState(newEditorState);
+
+        // After deletion, log the updated match string (i.e., after the change)
+        const updatedContentState = newEditorState.getCurrentContent();
+        const updatedBlockText = updatedContentState
+          .getBlockForKey(blockKey)
+          .getText();
+        const updatedCaretPosition = selectionState.getStartOffset();
+        const updatedTextBeforeCaret = updatedBlockText.slice(
+          0,
+          updatedCaretPosition
+        );
+
+        const updatedMatch = updatedTextBeforeCaret.match(/<([^<]*)$/);
+        if (updatedMatch) {
+          const updatedMatchString = updatedMatch[1];
+          setMatchString(updatedMatchString);
+          console.log(
+            'Updated Match String after Backspace:',
+            updatedMatchString
+          );
+          setFilteredSuggestions(
+            suggestions.filter((s) =>
+              s.toLowerCase().startsWith(updatedMatchString.toLowerCase())
+            )
+          );
+        } else {
+          // If the match string is empty or "<" has been deleted, clear the suggestions
+          setFilteredSuggestions([]);
+          setMatchString('');
+        }
+
+        return 'handled';
+      }
+    }
+
+    // Handle other commands like navigating the suggestions
     if (filteredSuggestions.length) {
       if (command === 'up') {
         setHighlightedIndex((prev) =>
@@ -103,7 +187,6 @@ const AutocompleteEditor = () => {
         );
         return 'handled';
       } else if (command === 'down') {
-        console.log('down handler');
         setHighlightedIndex((prev) =>
           prev < filteredSuggestions.length - 1 ? prev + 1 : 0
         );
@@ -113,6 +196,7 @@ const AutocompleteEditor = () => {
         return 'handled';
       }
     }
+
     return 'not-handled';
   };
 
@@ -198,7 +282,6 @@ const AutocompleteEditor = () => {
             keyBindingFn={keyBindingFn}
             placeholder="Type < followed by a word to see suggestions..."
           />
-          {/* Render dropdown here */}
         </div>
         {filteredSuggestions.length > 0 && (
           <ul
