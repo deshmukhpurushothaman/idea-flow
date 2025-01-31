@@ -181,48 +181,50 @@ const AutocompleteEditor = () => {
   const insertSuggestion = (suggestion: string) => {
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection();
-
+  
     const blockKey = selectionState.getStartKey();
     const blockText = contentState.getBlockForKey(blockKey).getText();
     const caretPosition = selectionState.getStartOffset();
-
+  
+    // Match the characters after '<' including the '<' itself
     const match = blockText.slice(0, caretPosition).match(/<([^<]*)$/);
-
+  
     if (match) {
-      const matchLength = match[0].length;
-
+      const matchLength = match[0].length; // Length of the matched text including '<'
+      const startOffset = caretPosition - matchLength; // Start of the match, including '<'
+  
       const contentStateWithEntity = contentState.createEntity(
         'AUTOCOMPLETE',
         'IMMUTABLE',
         { suggestion }
       );
       const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-
+  
+      // Replace the range including the '<' and the matched text with the selected suggestion
       const contentStateWithText = Modifier.replaceText(
         contentState,
         selectionState.merge({
-          focusOffset: selectionState.getStartOffset(),
-          anchorOffset:
-            selectionState.getStartOffset() - matchLength + suggestion.length,
+          anchorOffset: startOffset, // Start of the replacement
+          focusOffset: caretPosition, // End of the replacement
         }),
-        suggestion + ' ',
+        suggestion + ' ', // Add a trailing space after the suggestion
         undefined,
         entityKey
       );
-
+  
       const newEditorState = EditorState.push(
         editorState,
         contentStateWithText,
         'insert-characters'
       );
-
+  
       setEditorState(newEditorState);
       setMatchString('');
       setFilteredSuggestions([]);
       setHighlightedIndex(0);
     }
   };
-
+  
   const keyBindingFn = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowUp') return 'up';
     if (e.key === 'ArrowDown') return 'down';
